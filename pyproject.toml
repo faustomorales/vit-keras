@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
 ]
-description = "vit-keras is a Python project"
+description = "Keras implementation of ViT (Vision Transformer)"
 homepage = "https://github.com/faustomorales/vit-keras"
 license = "Apache License 2.0"
 name = "vit-keras"
