@@ -1,0 +1,13 @@
+.DS_Store
+.mypy_cache
+.pytest_cache
+.ipynb_checkpoints
+.venv
+__pycache__
+dist
+.coverage
+docs/build
+*.egg-info
+*.py[co]
+notebooks
+poetry.lock

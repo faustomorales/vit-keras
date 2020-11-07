@@ -1,0 +1,30 @@
+name: vit-keras CI/CD
+
+on:
+  push:
+    branches: 
+      - '**'
+
+jobs:
+  test:
+    name: Test vit-keras
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        run: |
+          pip install poetry
+      - name: Make Host Environment
+        run: |
+          make venv
+      - name: Test Source
+        run: |
+          make format-check type-check lint-check test

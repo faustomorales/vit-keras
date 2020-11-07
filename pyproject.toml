@@ -1,0 +1,72 @@
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+omit = []
+
+[tool.poetry]
+authors = ["Fausto Morales <faustomorales@gmail.com>"]
+classifiers = [
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+]
+description = "vit-keras is a Python project"
+homepage = "https://github.com/faustomorales/vit-keras"
+license = "Apache License 2.0"
+name = "vit-keras"
+readme = "README.md"
+repository = "https://github.com/faustomorales/vit-keras"
+# Placeholder for poetry-dynamic-versioning
+version = "0.0.0"
+
+# See https://python-poetry.org/docs/versions/ for allowed version specification formats
+[tool.poetry.dependencies]
+python = "^3.6"
+tensorflow-addons = "*"
+scipy = "*"
+validators = "*"
+
+[tool.poetry.dev-dependencies]
+black = "*"
+coverage = {version = "*", extras = ["toml"]}
+mypy = "*"
+pytest = "^6.1"
+pylint = "*"
+pytest-cov = "*"
+jupyterlab = "*"
+tensorflow = "*"
+opencv-python = "*"
+
+[tool.poetry.extras]
+viisualization = [
+    "matplotlib"
+]
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "semver"
+
+[tool.pytest.ini_options]
+addopts = "--cov=vit_keras --cov-report=term-missing"
+filterwarnings = []
+
+[tool.pylint.messages_control]
+disable = [
+    "line-too-long",
+    "missing-module-docstring",
+    "invalid-name",
+    "attribute-defined-outside-init",
+    "too-many-locals",
+    "too-many-arguments",
+    "too-many-branches",
+    "too-many-statements"
+]
+extension-pkg-whitelist = [
+    "cv2"
+]

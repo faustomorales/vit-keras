@@ -1,0 +1,10 @@
+{
+  "python.formatting.provider": "black",
+  "[yaml]": {
+    "editor.tabSize": 2
+  },
+  "[python]": {
+    "editor.formatOnPaste": false
+  },
+  "python.pythonPath": ".venv/bin/python3.6"
+}
