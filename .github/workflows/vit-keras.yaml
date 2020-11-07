@@ -27,4 +27,4 @@ jobs:
           make venv
       - name: Test Source
         run: |
-          make format-check type-check lint-check test
+          make format-check type-check lint-check
