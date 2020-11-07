@@ -1,6 +1,5 @@
 # type: ignore
 import tensorflow as tf
-import numpy as np
 from . import layers, utils
 
 CONFIG_B = {
