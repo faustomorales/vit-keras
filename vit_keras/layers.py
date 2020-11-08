@@ -80,11 +80,11 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
         key = self.separate_heads(key, batch_size)
         value = self.separate_heads(value, batch_size)
 
-        attention, _ = self.attention(query, key, value)
+        attention, weights = self.attention(query, key, value)
         attention = tf.transpose(attention, perm=[0, 2, 1, 3])
         concat_attention = tf.reshape(attention, (batch_size, -1, hidden_size))
         output = self.combine_heads(concat_attention)
-        return output
+        return output, weights
 
 
 class TransformerBlock(tf.keras.layers.Layer):
@@ -122,9 +122,9 @@ class TransformerBlock(tf.keras.layers.Layer):
 
     def call(self, inputs, training):
         x = self.layernorm1(inputs)
-        x = self.att(x)
+        x, weights = self.att(x)
         x = self.dropout(x, training=training)
         x = x + inputs
         y = self.layernorm2(x)
         y = self.mlpblock(y)
-        return x + y
+        return x + y, weights

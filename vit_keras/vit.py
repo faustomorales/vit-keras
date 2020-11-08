@@ -18,38 +18,38 @@ CONFIG_L = {
     "hidden_size": 1024,
 }
 
-BASE_URL = "https://storage.cloud.google.com/vit_models/"
+BASE_URL = "https://github.com/faustomorales/vit-keras/releases/download/dl/"
 
 WEIGHTS = {
     False: {
         "B16": (
-            BASE_URL + "imagenet21k/ViT-B_16.npz",
+            BASE_URL + "ViT-B_16_imagenet21k.npz",
             "ViT-B_16_imagenet21k.npz",
         ),
-        "B32": (BASE_URL + "imagenet21k/ViT-B_32.npz", "ViT-B_32_imagenet21k.npz"),
+        "B32": (BASE_URL + "ViT-B_32_imagenet21k.npz", "ViT-B_32_imagenet21k.npz"),
         # We're using the fine-tuned weights here because the non-fine-tuned weights
         # are not available yet. See https://github.com/googlse-research/vision_transformer/issues/15
         "L16": (
-            BASE_URL + "imagenet21k+imagenet2012/ViT-L_16.npz",
+            BASE_URL + "ViT-L_16_imagenet21k+imagenet2012.npz",
             "ViT-L_16_imagenet21k+imagenet2012.npz",
         ),
-        "L32": (BASE_URL + "imagenet21k/ViT-L_32.npz", "ViT-L_32_imagenet21k.npz"),
+        "L32": (BASE_URL + "ViT-L_32_imagenet21k.npz", "ViT-L_32_imagenet21k.npz"),
     },
     True: {
         "B16": (
-            BASE_URL + "imagenet21k+imagenet2012/ViT-B_16.npz",
+            BASE_URL + "ViT-B_16_imagenet21k+imagenet2012.npz",
             "ViT-B_16_imagenet21k+imagenet2012.npz",
         ),
         "B32": (
-            BASE_URL + "imagenet21k+imagenet2012/ViT-B_32.npz",
+            BASE_URL + "ViT-B_32_imagenet21k+imagenet2012.npz",
             "ViT-B_32_imagenet21k+imagenet2012.npz",
         ),
         "L16": (
-            BASE_URL + "imagenet21k+imagenet2012/ViT-L_16.npz",
+            BASE_URL + "ViT-L_16_imagenet21k+imagenet2012.npz",
             "ViT-L_16_imagenet21k+imagenet2012.npz",
         ),
         "L32": (
-            BASE_URL + "imagenet21k+imagenet2012/ViT-L_32.npz",
+            BASE_URL + "ViT-L_32_imagenet21k+imagenet2012.npz",
             "ViT-L_32_imagenet21k+imagenet2012.npz",
         ),
     },
@@ -108,7 +108,7 @@ def build_model(
     y = layers.ClassToken(name="class_token")(y)
     y = layers.AddPositionEmbs(name="Transformer/posembed_input")(y)
     for n in range(num_layers):
-        y = layers.TransformerBlock(
+        y, _ = layers.TransformerBlock(
             num_heads=num_heads,
             mlp_dim=mlp_dim,
             dropout=dropout,
