@@ -22,12 +22,12 @@ def attention_map(model, image):
     outputs = [
         l.output[1] for l in model.layers if isinstance(l, layers.TransformerBlock)
     ]
-    blocks = np.array(
+    weights = np.array(
         tf.keras.models.Model(inputs=model.inputs, outputs=outputs).predict(X)
     )
-    num_layers = blocks.shape[0]
-    num_heads = blocks.shape[2]
-    reshaped = blocks.reshape(
+    num_layers = weights.shape[0]
+    num_heads = weights.shape[2]
+    reshaped = weights.reshape(
         (num_layers, num_heads, grid_size ** 2 + 1, grid_size ** 2 + 1)
     )
 
