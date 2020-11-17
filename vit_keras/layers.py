@@ -9,14 +9,19 @@ class ClassToken(tf.keras.layers.Layer):
 
     def build(self, input_shape):
         cls_init = tf.zeros_initializer()
+        self.hidden_size = input_shape[-1]
         self.cls = tf.Variable(
             name="cls",
-            initial_value=cls_init(shape=(1, 1, input_shape[-1]), dtype="float32"),
+            initial_value=cls_init(shape=(1, 1, self.hidden_size), dtype="float32"),
             trainable=True,
         )
 
     def call(self, inputs):
-        return tf.concat([self.cls, inputs], 1)
+        batch_size = tf.shape(inputs)[0]
+        cls_broadcasted = tf.broadcast_to(
+            self.cls, [batch_size, 1, self.hidden_size]
+        )
+        return tf.concat([cls_broadcasted, inputs], 1)
 
 
 class AddPositionEmbs(tf.keras.layers.Layer):
@@ -51,6 +56,7 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
             raise ValueError(
                 f"embedding dimension = {hidden_size} should be divisible by number of heads = {num_heads}"
             )
+        self.hidden_size = hidden_size
         self.projection_dim = hidden_size // num_heads
         self.query_dense = tf.keras.layers.Dense(hidden_size, name="query")
         self.key_dense = tf.keras.layers.Dense(hidden_size, name="key")
@@ -72,7 +78,6 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
 
     def call(self, inputs):
         batch_size = tf.shape(inputs)[0]
-        hidden_size = tf.shape(inputs)[-1]
         query = self.query_dense(inputs)
         key = self.key_dense(inputs)
         value = self.value_dense(inputs)
@@ -82,7 +87,7 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
 
         attention, weights = self.attention(query, key, value)
         attention = tf.transpose(attention, perm=[0, 2, 1, 3])
-        concat_attention = tf.reshape(attention, (batch_size, -1, hidden_size))
+        concat_attention = tf.reshape(attention, (batch_size, -1, self.hidden_size))
         output = self.combine_heads(concat_attention)
         return output, weights
 
