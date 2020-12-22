@@ -22,17 +22,9 @@ BASE_URL = "https://github.com/faustomorales/vit-keras/releases/download/dl/"
 
 WEIGHTS = {
     False: {
-        "B16": (
-            BASE_URL + "ViT-B_16_imagenet21k.npz",
-            "ViT-B_16_imagenet21k.npz",
-        ),
+        "B16": (BASE_URL + "ViT-B_16_imagenet21k.npz", "ViT-B_16_imagenet21k.npz"),
         "B32": (BASE_URL + "ViT-B_32_imagenet21k.npz", "ViT-B_32_imagenet21k.npz"),
-        # We're using the fine-tuned weights here because the non-fine-tuned weights
-        # are not available yet. See https://github.com/googlse-research/vision_transformer/issues/15
-        "L16": (
-            BASE_URL + "ViT-L_16_imagenet21k+imagenet2012.npz",
-            "ViT-L_16_imagenet21k+imagenet2012.npz",
-        ),
+        "L16": (BASE_URL + "ViT-L_16_imagenet21k.npz", "ViT-L_16_imagenet21k.npz"),
         "L32": (BASE_URL + "ViT-L_32_imagenet21k.npz", "ViT-L_32_imagenet21k.npz"),
     },
     True: {
