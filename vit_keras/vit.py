@@ -1,4 +1,5 @@
 # type: ignore
+import warnings
 import tensorflow as tf
 from . import layers, utils
 
@@ -18,42 +19,9 @@ CONFIG_L = {
     "hidden_size": 1024,
 }
 
-BASE_URL = "https://github.com/faustomorales/vit-keras/releases/download/dl/"
-
-WEIGHTS = {
-    False: {
-        "B16": (
-            BASE_URL + "ViT-B_16_imagenet21k.npz",
-            "ViT-B_16_imagenet21k.npz",
-        ),
-        "B32": (BASE_URL + "ViT-B_32_imagenet21k.npz", "ViT-B_32_imagenet21k.npz"),
-        # We're using the fine-tuned weights here because the non-fine-tuned weights
-        # are not available yet. See https://github.com/googlse-research/vision_transformer/issues/15
-        "L16": (
-            BASE_URL + "ViT-L_16_imagenet21k+imagenet2012.npz",
-            "ViT-L_16_imagenet21k+imagenet2012.npz",
-        ),
-        "L32": (BASE_URL + "ViT-L_32_imagenet21k.npz", "ViT-L_32_imagenet21k.npz"),
-    },
-    True: {
-        "B16": (
-            BASE_URL + "ViT-B_16_imagenet21k+imagenet2012.npz",
-            "ViT-B_16_imagenet21k+imagenet2012.npz",
-        ),
-        "B32": (
-            BASE_URL + "ViT-B_32_imagenet21k+imagenet2012.npz",
-            "ViT-B_32_imagenet21k+imagenet2012.npz",
-        ),
-        "L16": (
-            BASE_URL + "ViT-L_16_imagenet21k+imagenet2012.npz",
-            "ViT-L_16_imagenet21k+imagenet2012.npz",
-        ),
-        "L32": (
-            BASE_URL + "ViT-L_32_imagenet21k+imagenet2012.npz",
-            "ViT-L_32_imagenet21k+imagenet2012.npz",
-        ),
-    },
-}
+BASE_URL = "https://github.com/faustomorales/vit-keras/releases/download/dl"
+WEIGHTS = {"imagenet21k": 21_843, "imagenet21k+imagenet2012": 1_000}
+SIZES = {"B_16", "B_32", "L_16", "L_32"}
 
 
 def preprocess_inputs(X):
@@ -127,9 +95,26 @@ def build_model(
     return tf.keras.models.Model(inputs=x, outputs=y)
 
 
-def load_pretrained(key, model, pretrained_top):
+def validate_pretrained_top(
+    include_top: bool, pretrained: bool, classes: int, weights: str
+):
+    """Validate that the pretrained weight configuration makes sense."""
+    assert weights in WEIGHTS, f"Unexpected weights: {weights}."
+    expected_classes = WEIGHTS[weights]
+    if classes != expected_classes:
+        warnings.warn(
+            f"Can only use pretrained_top with {weights} if classes = {expected_classes}. Setting manually.",
+            UserWarning,
+        )
+    assert include_top, "Can only use pretrained_top with include_top."
+    assert pretrained, "Can only use pretrained_top with pretrained."
+    return expected_classes
+
+
+def load_pretrained(size, weights, pretrained_top, model):
     """Load model weights for a known configuration."""
-    origin, fname = WEIGHTS[pretrained_top][key]
+    fname = f"ViT-{size}_{weights}.npz"
+    origin = f"{BASE_URL}/{fname}"
     local_filepath = tf.keras.utils.get_file(fname, origin, cache_subdir="weights")
     utils.load_weights_numpy(model, local_filepath, pretrained_top)
 
@@ -141,12 +126,16 @@ def vit_b16(
     include_top=True,
     pretrained=True,
     pretrained_top=True,
+    weights="imagenet21k+imagenet2012",
 ):
     """Build ViT-B16. All arguments passed to build_model."""
     if pretrained_top:
-        assert classes == 1000, "Can only use pretrained_top if classes = 1000."
-        assert include_top, "Can only use pretrained_top with include_top."
-        assert pretrained, "Can only use pretrained_top with pretrained."
+        classes = validate_pretrained_top(
+            include_top=include_top,
+            pretrained=pretrained,
+            classes=classes,
+            weights=weights,
+        )
     model = build_model(
         **CONFIG_B,
         patch_size=16,
@@ -154,10 +143,12 @@ def vit_b16(
         classes=classes,
         activation=activation,
         include_top=include_top,
-        representation_size=768 if pretrained and not pretrained_top else None,
+        representation_size=768 if weights == "imagenet21k" else None,
     )
     if pretrained:
-        load_pretrained(key="B16", model=model, pretrained_top=pretrained_top)
+        load_pretrained(
+            size="B_16", weights=weights, model=model, pretrained_top=pretrained_top
+        )
     return model
 
 
@@ -168,12 +159,16 @@ def vit_b32(
     include_top=True,
     pretrained=True,
     pretrained_top=True,
+    weights="imagenet21k+imagenet2012",
 ):
     """Build ViT-B32. All arguments passed to build_model."""
     if pretrained_top:
-        assert classes == 1000, "Can only use pretrained_top if classes = 1000."
-        assert include_top, "Can only use pretrained_top with include_top."
-        assert pretrained, "Can only use pretrained_top with pretrained."
+        classes = validate_pretrained_top(
+            include_top=include_top,
+            pretrained=pretrained,
+            classes=classes,
+            weights=weights,
+        )
     model = build_model(
         **CONFIG_B,
         patch_size=32,
@@ -181,10 +176,12 @@ def vit_b32(
         classes=classes,
         activation=activation,
         include_top=include_top,
-        representation_size=768 if pretrained and not pretrained_top else None,
+        representation_size=768 if weights == "imagenet21k" else None,
     )
     if pretrained:
-        load_pretrained(key="B32", model=model, pretrained_top=pretrained_top)
+        load_pretrained(
+            size="B_32", weights=weights, model=model, pretrained_top=pretrained_top
+        )
     return model
 
 
@@ -195,12 +192,16 @@ def vit_l16(
     include_top=True,
     pretrained=True,
     pretrained_top=True,
+    weights="imagenet21k+imagenet2012",
 ):
     """Build ViT-L16. All arguments passed to build_model."""
     if pretrained_top:
-        assert classes == 1000, "Can only use pretrained_top if classes = 1000."
-        assert include_top, "Can only use pretrained_top with include_top."
-        assert pretrained, "Can only use pretrained_top with pretrained."
+        classes = validate_pretrained_top(
+            include_top=include_top,
+            pretrained=pretrained,
+            classes=classes,
+            weights=weights,
+        )
     model = build_model(
         **CONFIG_L,
         patch_size=16,
@@ -208,10 +209,12 @@ def vit_l16(
         classes=classes,
         activation=activation,
         include_top=include_top,
-        representation_size=None,
+        representation_size=1024 if weights == "imagenet21k" else None,
     )
     if pretrained:
-        load_pretrained(key="L16", model=model, pretrained_top=pretrained_top)
+        load_pretrained(
+            size="L_16", weights=weights, model=model, pretrained_top=pretrained_top
+        )
     return model
 
 
@@ -222,12 +225,16 @@ def vit_l32(
     include_top=True,
     pretrained=True,
     pretrained_top=True,
+    weights="imagenet21k+imagenet2012",
 ):
     """Build ViT-L32. All arguments passed to build_model."""
     if pretrained_top:
-        assert classes == 1000, "Can only use pretrained_top if classes = 1000."
-        assert include_top, "Can only use pretrained_top with include_top."
-        assert pretrained, "Can only use pretrained_top with pretrained."
+        classes = validate_pretrained_top(
+            include_top=include_top,
+            pretrained=pretrained,
+            classes=classes,
+            weights=weights,
+        )
     model = build_model(
         **CONFIG_L,
         patch_size=32,
@@ -235,8 +242,10 @@ def vit_l32(
         classes=classes,
         activation=activation,
         include_top=include_top,
-        representation_size=1024 if pretrained and not pretrained_top else None,
+        representation_size=1024 if weights == "imagenet21k" else None,
     )
     if pretrained:
-        load_pretrained(key="L32", model=model, pretrained_top=pretrained_top)
+        load_pretrained(
+            size="L_32", weights=weights, model=model, pretrained_top=pretrained_top
+        )
     return model

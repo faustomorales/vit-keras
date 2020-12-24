@@ -60,6 +60,32 @@ def read(filepath_or_buffer: ImageInputType, size, timeout=None):
     return cv2.resize(image, (size, size))
 
 
+def apply_embedding_weights(target_layer, source_weights):
+    """Apply embedding weights to a target layer.
+
+    Args:
+        target_layer: The target layer to which weights will
+            be applied.
+        source_weights: The source weights, which will be
+            resized as necessary.
+    """
+    expected_shape = target_layer.weights[0].shape
+    if expected_shape != source_weights.shape:
+        token, grid = source_weights[0, :1], source_weights[0, 1:]
+        sin = int(np.sqrt(grid.shape[0]))
+        sout = int(np.sqrt(expected_shape[1] - 1))
+        warnings.warn(
+            "Resizing position embeddings from " f"{sin} to {sout}",
+            UserWarning,
+        )
+        zoom = (sout / sin, sout / sin, 1)
+        grid = sp.ndimage.zoom(grid.reshape(sin, sin, -1), zoom, order=1).reshape(
+            sout * sout, -1
+        )
+        source_weights = np.concatenate([token, grid], axis=0)[np.newaxis]
+    target_layer.set_weights([source_weights])
+
+
 def load_weights_numpy(model, params_path, pretrained_top):
     """Load weights saved using Flax as a numpy array.
 
@@ -68,107 +94,111 @@ def load_weights_numpy(model, params_path, pretrained_top):
         params_path: Filepath to a numpy archive.
         pretrained_top: Whether to load the top layer weights.
     """
-    params_dict = np.load(params_path, allow_pickle=False)
-    weights_dict = {}
-    input_keys = list(params_dict.keys())
+    params_dict = np.load(
+        params_path, allow_pickle=False
+    )  # pylint: disable=unexpected-keyword-arg
+    source_keys = list(params_dict.keys())
     pre_logits = any(l.name == "pre_logits" for l in model.layers)
-    input_keys_taken = []
-    output_keys_assigned = []
-    output_weights = {w.name: w.numpy() for w in model.weights}
-    if not pretrained_top:
-        for key in ["head/kernel", "head/bias"]:
-            if key in output_weights:
-                del output_weights[f"{key}:0"]
-            if key in input_keys:
-                input_keys.remove(key)
+    source_keys_used = []
     n_transformers = len(
         set(
             "/".join(k.split("/")[:2])
-            for k in input_keys
+            for k in source_keys
             if k.startswith("Transformer/encoderblock_")
         )
     )
-    n_transformers_out = len(
-        set(
-            "/".join(k.split("/")[:2])
-            for k in output_weights
-            if k.startswith("Transformer/encoderblock_")
-        )
+    n_transformers_out = sum(
+        l.name.startswith("Transformer/encoderblock_") for l in model.layers
     )
     assert n_transformers == n_transformers_out, (
         f"Wrong number of transformers ("
         f"{n_transformers_out} in model vs. {n_transformers} in weights)."
     )
 
-    def apply_weights(keyi, keyo):
-        assert keyo in output_weights, f"{keyo} not in output weights."
-        expected_shape = output_weights[keyo].shape
-        actual_weights = params_dict[keyi]
-        if keyi == "Transformer/posembed_input/pos_embedding":
-            if expected_shape != actual_weights.shape:
-                token, grid = actual_weights[0, :1], actual_weights[0, 1:]
-                sin = int(np.sqrt(grid.shape[0]))
-                sout = int(np.sqrt(expected_shape[1] - 1))
-                warnings.warn(
-                    "Resizing position embeddings from " f"{sin} to {sout}",
-                    UserWarning,
-                )
-                zoom = (sout / sin, sout / sin, 1)
-                grid = sp.ndimage.zoom(
-                    grid.reshape(sin, sin, -1), zoom, order=1
-                ).reshape(sout * sout, -1)
-                actual_weights = np.concatenate([token, grid], axis=0)[np.newaxis]
-        if "MultiHeadDotProductAttention" in keyi:
-            actual_weights = actual_weights.reshape(expected_shape)
-        actual_shape = actual_weights.shape
-        assert expected_shape == actual_shape, (
-            f"Shapes for layer: {keyi} / {keyo} do not match "
-            f"({actual_shape} in weights vs. {expected_shape} in model."
-        )
-        weights_dict[keyo] = actual_weights
-        input_keys_taken.append(keyi)
-        output_keys_assigned.append(keyo)
-
+    matches = []
     for tidx in range(n_transformers):
-        for norm in ["LayerNorm_0", "LayerNorm_2"]:
-            for inname, outname in [("scale", "gamma"), ("bias", "beta")]:
-                apply_weights(
-                    f"Transformer/encoderblock_{tidx}/{norm}/{inname}",
-                    f"Transformer/encoderblock_{tidx}/{norm}/{outname}:0",
-                )
-        for mlpdense in [0, 1]:
-            for subname in ["kernel", "bias"]:
-                apply_weights(
-                    f"Transformer/encoderblock_{tidx}/MlpBlock_3/Dense_{mlpdense}/{subname}",
-                    f"Transformer/encoderblock_{tidx}/MlpBlock_3/Dense_{mlpdense}/{subname}:0",
-                )
-        for attvar in ["query", "key", "value", "out"]:
-            for subname in ["kernel", "bias"]:
-                apply_weights(
-                    f"Transformer/encoderblock_{tidx}/MultiHeadDotProductAttention_1/{attvar}/{subname}",
-                    f"Transformer/encoderblock_{tidx}/MultiHeadDotProductAttention_1/{attvar}/{subname}:0",
-                )
-    for attvar in ["embedding", "head", "pre_logits"]:
-        if attvar == "head" and not pretrained_top:
-            continue
-        if attvar == "pre_logits" and not pre_logits:
-            continue
-        for subname in ["kernel", "bias"]:
-            apply_weights(f"{attvar}/{subname}", f"{attvar}/{subname}:0")
-    for attname in ["Transformer/posembed_input/pos_embedding"]:
-        apply_weights(f"{attname}", f"{attname}:0")
-    for iname, outname in [("cls", "class_token/cls:0")]:
-        apply_weights(iname, outname)
-    for inname, outname in [("scale", "gamma"), ("bias", "beta")]:
-        apply_weights(
-            f"Transformer/encoder_norm/{inname}",
-            f"Transformer/encoder_norm/{outname}:0",
+        encoder = model.get_layer(f"Transformer/encoderblock_{tidx}")
+        source_prefix = f"Transformer/encoderblock_{tidx}"
+        matches.extend(
+            [
+                {
+                    "layer": layer,
+                    "keys": [
+                        f"{source_prefix}/{norm}/{name}" for name in ["scale", "bias"]
+                    ],
+                }
+                for norm, layer in [
+                    ("LayerNorm_0", encoder.layernorm1),
+                    ("LayerNorm_2", encoder.layernorm2),
+                ]
+            ]
+            + [
+                {
+                    "layer": encoder.mlpblock.get_layer(f"Dense_{mlpdense}"),
+                    "keys": [
+                        f"{source_prefix}/MlpBlock_3/Dense_{mlpdense}/{name}"
+                        for name in ["kernel", "bias"]
+                    ],
+                }
+                for mlpdense in [0, 1]
+            ]
+            + [
+                {
+                    "layer": layer,
+                    "keys": [
+                        f"{source_prefix}/MultiHeadDotProductAttention_1/{attvar}/{name}"
+                        for name in ["kernel", "bias"]
+                    ],
+                    "reshape": True,
+                }
+                for attvar, layer in [
+                    ("query", encoder.att.query_dense),
+                    ("key", encoder.att.key_dense),
+                    ("value", encoder.att.value_dense),
+                    ("out", encoder.att.combine_heads),
+                ]
+            ]
         )
-    unused = [k for k in input_keys if k not in input_keys_taken]
-    missing = [k for k in output_weights if k not in output_keys_assigned]
+    for layer_name in ["embedding", "head", "pre_logits"]:
+        if layer_name == "head" and not pretrained_top:
+            continue
+        if layer_name == "pre_logits" and not pre_logits:
+            continue
+        matches.append(
+            {
+                "layer": model.get_layer(layer_name),
+                "keys": [f"{layer_name}/{name}" for name in ["kernel", "bias"]],
+            }
+        )
+    matches.append({"layer": model.get_layer("class_token"), "keys": ["cls"]})
+    matches.append(
+        {
+            "layer": model.get_layer("Transformer/encoder_norm"),
+            "keys": [f"Transformer/encoder_norm/{name}" for name in ["scale", "bias"]],
+        }
+    )
+    apply_embedding_weights(
+        target_layer=model.get_layer("Transformer/posembed_input"),
+        source_weights=params_dict["Transformer/posembed_input/pos_embedding"],
+    )
+    source_keys_used.append("Transformer/posembed_input/pos_embedding")
+    for match in matches:
+        source_keys_used.extend(match["keys"])
+        source_weights = [params_dict[k] for k in match["keys"]]
+        if match.get("reshape", False):
+            source_weights = [
+                source.reshape(expected.shape)
+                for source, expected in zip(
+                    source_weights, match["layer"].get_weights()
+                )
+            ]
+        match["layer"].set_weights(source_weights)
+    unused = set(source_keys).difference(source_keys_used)
     if unused:
         warnings.warn(f"Did not use the following weights: {unused}", UserWarning)
-    if missing:
-        warnings.warn(f"Did not use the following weights: {missing}", UserWarning)
-    weights = [weights_dict.get(k, output_weights[k]) for k in output_weights]
-    model.set_weights(weights)
+    target_keys_set = len(source_keys_used)
+    target_keys_all = len(model.weights)
+    if target_keys_set < target_keys_all:
+        warnings.warn(
+            f"Only set {target_keys_set} of {target_keys_all} weights.", UserWarning
+        )

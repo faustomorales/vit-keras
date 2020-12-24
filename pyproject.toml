@@ -38,7 +38,6 @@ mypy = "*"
 pytest = "^6.1"
 pylint = "*"
 pytest-cov = "*"
-jupyterlab = "*"
 tensorflow = "*"
 opencv-python = "*"
 
