@@ -161,6 +161,7 @@ def load_weights_numpy(model, params_path, pretrained_top):
         )
     for layer_name in ["embedding", "head", "pre_logits"]:
         if layer_name == "head" and not pretrained_top:
+            source_keys_used.extend(["head/kernel", "head/bias"])
             continue
         if layer_name == "pre_logits" and not pre_logits:
             continue
