@@ -37,6 +37,7 @@ def build_model(
     num_layers: int,
     hidden_size: int,
     num_heads: int,
+    name: str,
     mlp_dim: int,
     classes: int,
     dropout=0.1,
@@ -92,7 +93,7 @@ def build_model(
         )(y)
     if include_top:
         y = tf.keras.layers.Dense(classes, name="head", activation=activation)(y)
-    return tf.keras.models.Model(inputs=x, outputs=y)
+    return tf.keras.models.Model(inputs=x, outputs=y, name=name)
 
 
 def validate_pretrained_top(
@@ -138,6 +139,7 @@ def vit_b16(
         )
     model = build_model(
         **CONFIG_B,
+        name="vit-b16",
         patch_size=16,
         image_size=image_size,
         classes=classes,
@@ -171,6 +173,7 @@ def vit_b32(
         )
     model = build_model(
         **CONFIG_B,
+        name="vit-b32",
         patch_size=32,
         image_size=image_size,
         classes=classes,
@@ -205,6 +208,7 @@ def vit_l16(
     model = build_model(
         **CONFIG_L,
         patch_size=16,
+        name="vit-l16",
         image_size=image_size,
         classes=classes,
         activation=activation,
@@ -238,6 +242,7 @@ def vit_l32(
     model = build_model(
         **CONFIG_L,
         patch_size=32,
+        name="vit-l32",
         image_size=image_size,
         classes=classes,
         activation=activation,
