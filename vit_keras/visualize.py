@@ -48,5 +48,7 @@ def attention_map(model, image):
 
     # Attention from the output token to the input space.
     mask = v[0, 1:].reshape(grid_size, grid_size)
-    mask = cv2.resize(mask / mask.max(), image.shape[:2])[..., np.newaxis]
+    mask = cv2.resize(mask / mask.max(), (image.shape[1], image.shape[0]))[
+        ..., np.newaxis
+    ]
     return (mask * image).astype("uint8")
