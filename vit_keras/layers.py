@@ -31,7 +31,7 @@ class AddPositionEmbs(tf.keras.layers.Layer):
         ), f"Number of dimensions should be 3, got {len(input_shape)}"
         self.pe = tf.Variable(
             name="pos_embedding",
-            initial_value=tf.initializers.random_normal(stddev=0.06)(
+            initial_value=tf.random_normal_initializer(stddev=0.06)(
                 shape=(1, input_shape[1], input_shape[2])
             ),
             dtype="float32",
