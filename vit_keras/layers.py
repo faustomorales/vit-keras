@@ -18,7 +18,7 @@ class ClassToken(tf.keras.layers.Layer):
 
     def call(self, inputs):
         batch_size = tf.shape(inputs)[0]
-        cls_broadcasted = tf.broadcast_to(self.cls, [batch_size, 1, self.hidden_size])
+        cls_broadcasted = tf.cast(tf.broadcast_to(self.cls, [batch_size, 1, self.hidden_size]), dtype=inputs.dtype)
         return tf.concat([cls_broadcasted, inputs], 1)
 
 
@@ -39,7 +39,7 @@ class AddPositionEmbs(tf.keras.layers.Layer):
         )
 
     def call(self, inputs):
-        return inputs + self.pe
+        return inputs + tf.cast(self.pe, dtype=inputs.dtype)
 
 
 class MultiHeadSelfAttention(tf.keras.layers.Layer):
@@ -64,7 +64,7 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
     # pylint: disable=no-self-use
     def attention(self, query, key, value):
         score = tf.matmul(query, key, transpose_b=True)
-        dim_key = tf.cast(tf.shape(key)[-1], tf.float32)
+        dim_key = tf.cast(tf.shape(key)[-1], score.dtype)
         scaled_score = score / tf.math.sqrt(dim_key)
         weights = tf.nn.softmax(scaled_score, axis=-1)
         output = tf.matmul(weights, value)
