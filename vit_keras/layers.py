@@ -18,7 +18,10 @@ class ClassToken(tf.keras.layers.Layer):
 
     def call(self, inputs):
         batch_size = tf.shape(inputs)[0]
-        cls_broadcasted = tf.cast(tf.broadcast_to(self.cls, [batch_size, 1, self.hidden_size]), dtype=inputs.dtype)
+        cls_broadcasted = tf.cast(
+            tf.broadcast_to(self.cls, [batch_size, 1, self.hidden_size]),
+            dtype=inputs.dtype,
+        )
         return tf.concat([cls_broadcasted, inputs], 1)
 
 
