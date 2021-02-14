@@ -11,3 +11,4 @@ docs/build
 *.py[co]
 notebooks
 poetry.lock
+*.h5
