@@ -53,7 +53,9 @@ style = "semver"
 
 [tool.pytest.ini_options]
 addopts = "--cov=vit_keras --cov-report=term-missing"
-filterwarnings = []
+filterwarnings = [
+    "ignore:the imp module is deprecated in favour of importlib;:DeprecationWarning"
+]
 
 [tool.pylint.messages_control]
 disable = [

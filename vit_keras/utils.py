@@ -134,7 +134,9 @@ def load_weights_numpy(model, params_path, pretrained_top):
             ]
             + [
                 {
-                    "layer": encoder.mlpblock.get_layer(f"Dense_{mlpdense}"),
+                    "layer": encoder.mlpblock.get_layer(
+                        f"{source_prefix}/Dense_{mlpdense}"
+                    ),
                     "keys": [
                         f"{source_prefix}/MlpBlock_3/Dense_{mlpdense}/{name}"
                         for name in ["kernel", "bias"]

@@ -2,8 +2,8 @@ name: vit-keras CI/CD
 
 on:
   push:
-    branches: 
-      - '**'
+    branches:
+      - "**"
 
 jobs:
   test:
@@ -27,4 +27,4 @@ jobs:
           make venv
       - name: Test Source
         run: |
-          make format-check type-check lint-check
+          make format-check type-check lint-check test

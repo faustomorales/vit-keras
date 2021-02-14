@@ -110,10 +110,14 @@ class TransformerBlock(tf.keras.layers.Layer):
         self.mlpblock = tf.keras.Sequential(
             [
                 tf.keras.layers.Dense(
-                    self.mlp_dim, activation=tfa.activations.gelu, name="Dense_0"
+                    self.mlp_dim,
+                    activation=tf.keras.activations.gelu
+                    if hasattr(tf.keras.activations, "gelu")
+                    else tfa.activations.gelu,
+                    name=f"{self.name}/Dense_0",
                 ),
                 tf.keras.layers.Dropout(self.dropout),
-                tf.keras.layers.Dense(input_shape[-1], name="Dense_1"),
+                tf.keras.layers.Dense(input_shape[-1], name=f"{self.name}/Dense_1"),
                 tf.keras.layers.Dropout(self.dropout),
             ],
             name="MlpBlock_3",
