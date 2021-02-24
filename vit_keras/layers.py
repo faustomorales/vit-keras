@@ -1,5 +1,5 @@
 # pylint: disable=arguments-differ,missing-function-docstring,missing-class-docstring,unexpected-keyword-arg,no-value-for-parameter
-
+import functools
 import tensorflow as tf
 import tensorflow_addons as tfa
 
@@ -111,9 +111,12 @@ class TransformerBlock(tf.keras.layers.Layer):
             [
                 tf.keras.layers.Dense(
                     self.mlp_dim,
-                    activation=tf.keras.activations.gelu
-                    if hasattr(tf.keras.activations, "gelu")
-                    else tfa.activations.gelu,
+                    activation=functools.partial(
+                        tf.keras.activations.gelu
+                        if hasattr(tf.keras.activations, "gelu")
+                        else tfa.activations.gelu,
+                        approximate=False,
+                    ),
                     name=f"{self.name}/Dense_0",
                 ),
                 tf.keras.layers.Dropout(self.dropout),
