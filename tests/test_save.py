@@ -19,3 +19,4 @@ def test_saving():
     loss = tf.keras.losses.CategoricalCrossentropy()
     model.compile(optimizer=opt, loss=loss, metrics=["categorical_accuracy"])
     model.save("weights.h5")
+    tf.saved_model.save(model, "weights")

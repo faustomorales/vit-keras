@@ -12,3 +12,4 @@ docs/build
 notebooks
 poetry.lock
 *.h5
+weights/
