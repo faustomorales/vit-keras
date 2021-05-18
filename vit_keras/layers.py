@@ -132,13 +132,18 @@ class TransformerBlock(tf.keras.layers.Layer):
         self.layernorm2 = tf.keras.layers.LayerNormalization(
             epsilon=1e-6, name="LayerNorm_2"
         )
-        self.dropout = tf.keras.layers.Dropout(self.dropout)
+        self.dropout_layer = tf.keras.layers.Dropout(self.dropout)
 
     def call(self, inputs, training):
         x = self.layernorm1(inputs)
         x, weights = self.att(x)
-        x = self.dropout(x, training=training)
+        x = self.dropout_layer(x, training=training)
         x = x + inputs
         y = self.layernorm2(x)
         y = self.mlpblock(y)
         return x + y, weights
+
+    def get_config(self):
+        return {"num_heads": self.num_heads,
+                "mlp_dim": self.mlp_dim,
+                "dropout": self.dropout}
