@@ -144,6 +144,8 @@ class TransformerBlock(tf.keras.layers.Layer):
         return x + y, weights
 
     def get_config(self):
-        return {"num_heads": self.num_heads,
-                "mlp_dim": self.mlp_dim,
-                "dropout": self.dropout}
+        return {
+            "num_heads": self.num_heads,
+            "mlp_dim": self.mlp_dim,
+            "dropout": self.dropout,
+        }
