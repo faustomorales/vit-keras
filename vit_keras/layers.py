@@ -92,6 +92,7 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
         return output, weights
 
 
+# pylint: disable=too-many-instance-attributes
 class TransformerBlock(tf.keras.layers.Layer):
     """Implements a Transformer block."""
 
