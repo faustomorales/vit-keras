@@ -19,12 +19,9 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Poetry
-        run: |
-          pip install poetry
       - name: Make Host Environment
         run: |
-          make venv
+          make init
       - name: Test Source
         run: |
           make format-check type-check lint-check test

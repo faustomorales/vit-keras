@@ -1,9 +1,6 @@
-.PHONY: help clean dev-tools doc doc-autobuild format-check image package pbd-test test type-check \
-	venv venv-activate lint-check
+.PHONY: docs
 
-SHELL:=/bin/bash
 PKG_NAME:=vit_keras
-IMAGE_NAME:=vit-keras
 
 # Select specific Python tests to run using pytest selectors
 # e.g., make test TEST_SCOPE='-m "not_integration" tests/api/'
@@ -20,22 +17,12 @@ help:
 	@echo
 	@echo "Tips"
 	@echo "----"
-	@echo '- Run `make venv-activate` to activate the project virtualenv in your shell'
+	@echo '- Run `make shell` to activate the project virtualenv in your shell'
 	@echo '  e.g., make test TEST_SCOPE="-m not_integration tests/api/"'
 
-clean-all: clean ## Make a completely clean source tree, including .venv
-	@rm -rf .venv
-
-clean: ## Make a clean source tree, keeping .venv
-	@rm -rf .coverage .mypy_cache .pytest_cache build dist docs/build *.egg-info
-	@-find . -name '__pycache__' ! -path './.venv/*' -exec rm -rf {} \;
-
-doc: ## Make HTML documentation from Sphinx source
-	@mkdir -p docs/build
-	@$(EXEC) sphinx-build -M html docs/source docs/build/html
-
-doc-autobuild: ## Make a local HTML doc server that updates on changes to from Sphinx source
-	@$(EXEC) sphinx-autobuild -b html docs/source docs/build/html $(SPHINX_AUTO_EXTRA)
+init:  ## Initialize the development environment.
+	pip install poetry poetry-dynamic-versioning
+	poetry install
 
 format-check: ## Make black check source formatting
 	@$(EXEC) black --diff --check .
@@ -43,15 +30,9 @@ format-check: ## Make black check source formatting
 format: ## Make black unabashedly format source code
 	@$(EXEC) black .
 
-lock: ## Make a poetry.lock file
-	@$(EXEC) poetry lock
-
 package: ## Make a local build of the Python package, source dist and wheel
 	@mkdir -p dist
 	@$(EXEC) poetry build
-
-pdb-test: ## Make pytest run tests and drop to pdb on error
-	@$(EXEC) pytest -vxrs --pdb $(TEST_SCOPE)
 
 test: ## Make pytest run tests
 	@$(EXEC) pytest -vxrs $(TEST_SCOPE)
@@ -60,10 +41,14 @@ type-check: ## Make mypy check types
 	@$(EXEC) mypy $(PKG_NAME) tests
 
 lint-check: ## Make pylint lint the package
-	@$(EXEC) pylint --jobs 0 vit_keras
-
-venv: lock ## Make a poetry virtualenv on the host
-	@POETRY_VIRTUALENVS_IN_PROJECT=true poetry install
+	@$(EXEC) pylint --jobs 0 $(PKG_NAME)
 
 lab: ## Start a jupyter lab instance
 	@$(EXEC) jupyter lab
+
+shell:  ## Jump into poetry shell.
+	poetry shell
+
+docs: ## Make a local HTML doc server that updates on changes to from Sphinx source
+	pip install docs/requirements.txt
+	@$(EXEC) sphinx-autobuild -b html docs/source docs/build/html $(SPHINX_AUTO_EXTRA)
