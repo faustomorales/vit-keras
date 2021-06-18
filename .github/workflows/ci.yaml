@@ -1,4 +1,4 @@
-name: vit-keras CI/CD
+name: CI/CD
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    name: Test vit-keras
+    name: Automated checks
     strategy:
       matrix:
         python-version: [3.6]
