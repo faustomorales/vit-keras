@@ -1,0 +1,11 @@
+tensorflow>=2.4
+tensroflow_addons
+validators
+numpy
+scipy
+cv2
+matplotlib
+http
+requests
+io
+setuptools

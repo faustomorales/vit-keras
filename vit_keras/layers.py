@@ -5,7 +5,10 @@ import tensorflow_addons as tfa
 @tf.keras.utils.register_keras_serializable
 class ClassToken(tf.keras.layers.Layer):
     """Append a class token to an input layer."""
-
+    
+    def __init__(self, name, **kwargs):
+        super().__init__(name=name, **kwargs)
+        
     def build(self, input_shape):
         cls_init = tf.zeros_initializer()
         self.hidden_size = input_shape[-1]
@@ -27,6 +30,9 @@ class ClassToken(tf.keras.layers.Layer):
 class AddPositionEmbs(tf.keras.layers.Layer):
     """Adds (optionally learned) positional embeddings to the inputs."""
 
+    def __init__(self, name, **kwargs):
+        super().__init__(name=name, **kwargs)
+        
     def build(self, input_shape):
         assert (
             len(input_shape) == 3
