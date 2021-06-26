@@ -1,5 +1,5 @@
 tensorflow>=2.4
-tensroflow_addons
+tensorflow_addons
 validators
 numpy
 scipy
