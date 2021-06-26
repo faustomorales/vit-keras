@@ -1,9 +1,0 @@
-tensorflow>=2.4
-tensorflow_addons
-validators
-numpy
-scipy
-opencv-python
-matplotlib
-requests
-setuptools
