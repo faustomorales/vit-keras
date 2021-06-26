@@ -28,7 +28,7 @@ class ClassToken(tf.keras.layers.Layer):
         return tf.concat([cls_broadcasted, inputs], 1)
 
     def get_config(self):
-        config = super(ClassToken, self).get_config()
+        config = super().get_config()
         return config
 
     @classmethod
@@ -60,7 +60,7 @@ class AddPositionEmbs(tf.keras.layers.Layer):
         return inputs + tf.cast(self.pe, dtype=inputs.dtype)
 
     def get_config(self):
-        config = super(AddPositionEmbs, self).get_config()
+        config = super().get_config()
         return config
 
     @classmethod
@@ -117,7 +117,7 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
         return output, weights
 
     def get_config(self):
-        config = super(MultiHeadSelfAttention, self).get_config()
+        config = super().get_config()
         config.update({"num_heads": self.num_heads})
         return config
 
@@ -180,7 +180,7 @@ class TransformerBlock(tf.keras.layers.Layer):
         return x + y, weights
 
     def get_config(self):
-        config = super(TransformerBlock, self).get_config()
+        config = super().get_config()
         config.update(
             {
                 "num_heads": self.num_heads,
