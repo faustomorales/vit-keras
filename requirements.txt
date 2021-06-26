@@ -3,7 +3,7 @@ tensorflow_addons
 validators
 numpy
 scipy
-cv2
+opencv-python
 matplotlib
 http
 requests
