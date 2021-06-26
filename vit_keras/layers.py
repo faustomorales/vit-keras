@@ -2,7 +2,7 @@
 import tensorflow as tf
 import tensorflow_addons as tfa
 
-
+@tf.keras.utils.register_keras_serializable
 class ClassToken(tf.keras.layers.Layer):
     """Append a class token to an input layer."""
 
@@ -23,7 +23,7 @@ class ClassToken(tf.keras.layers.Layer):
         )
         return tf.concat([cls_broadcasted, inputs], 1)
 
-
+@tf.keras.utils.register_keras_serializable
 class AddPositionEmbs(tf.keras.layers.Layer):
     """Adds (optionally learned) positional embeddings to the inputs."""
 
@@ -43,7 +43,7 @@ class AddPositionEmbs(tf.keras.layers.Layer):
     def call(self, inputs):
         return inputs + tf.cast(self.pe, dtype=inputs.dtype)
 
-
+@tf.keras.utils.register_keras_serializable
 class MultiHeadSelfAttention(tf.keras.layers.Layer):
     def __init__(self, *args, num_heads, **kwargs):
         super().__init__(*args, **kwargs)
@@ -93,6 +93,7 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
 
 
 # pylint: disable=too-many-instance-attributes
+@tf.keras.utils.register_keras_serializable
 class TransformerBlock(tf.keras.layers.Layer):
     """Implements a Transformer block."""
 
