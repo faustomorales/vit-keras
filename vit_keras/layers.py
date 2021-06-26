@@ -3,8 +3,12 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 
 
+@tf.keras.utils.register_keras_serializable()
 class ClassToken(tf.keras.layers.Layer):
     """Append a class token to an input layer."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def build(self, input_shape):
         cls_init = tf.zeros_initializer()
@@ -23,9 +27,21 @@ class ClassToken(tf.keras.layers.Layer):
         )
         return tf.concat([cls_broadcasted, inputs], 1)
 
+    def get_config(self):
+        config = super(ClassToken, self).get_config()
+        return config
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+
+@tf.keras.utils.register_keras_serializable()
 class AddPositionEmbs(tf.keras.layers.Layer):
     """Adds (optionally learned) positional embeddings to the inputs."""
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def build(self, input_shape):
         assert (
@@ -43,7 +59,16 @@ class AddPositionEmbs(tf.keras.layers.Layer):
     def call(self, inputs):
         return inputs + tf.cast(self.pe, dtype=inputs.dtype)
 
+    def get_config(self):
+        config = super(AddPositionEmbs, self).get_config()
+        return config
 
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+
+@tf.keras.utils.register_keras_serializable()
 class MultiHeadSelfAttention(tf.keras.layers.Layer):
     def __init__(self, *args, num_heads, **kwargs):
         super().__init__(*args, **kwargs)
@@ -91,8 +116,18 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
         output = self.combine_heads(concat_attention)
         return output, weights
 
+    def get_config(self):
+        config = super(MultiHeadSelfAttention, self).get_config()
+        config.update({"num_heads": self.num_heads})
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
 
 # pylint: disable=too-many-instance-attributes
+@tf.keras.utils.register_keras_serializable()
 class TransformerBlock(tf.keras.layers.Layer):
     """Implements a Transformer block."""
 
@@ -145,8 +180,16 @@ class TransformerBlock(tf.keras.layers.Layer):
         return x + y, weights
 
     def get_config(self):
-        return {
-            "num_heads": self.num_heads,
-            "mlp_dim": self.mlp_dim,
-            "dropout": self.dropout,
-        }
+        config = super(TransformerBlock, self).get_config()
+        config.update(
+            {
+                "num_heads": self.num_heads,
+                "mlp_dim": self.mlp_dim,
+                "dropout": self.dropout,
+            }
+        )
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
