@@ -60,7 +60,7 @@ def read(filepath_or_buffer: ImageInputType, size, timeout=None):
     return cv2.resize(image, (size, size))
 
 
-def apply_embedding_weights(target_layer, source_weights):
+def apply_embedding_weights(target_layer, source_weights, num_x_patches, num_y_patches):
     """Apply embedding weights to a target layer.
 
     Args:
@@ -68,31 +68,36 @@ def apply_embedding_weights(target_layer, source_weights):
             be applied.
         source_weights: The source weights, which will be
             resized as necessary.
+        num_x_patches: Number of patches in height of image.
+        num_y_patches: Number of patches in width of image.
     """
     expected_shape = target_layer.weights[0].shape
     if expected_shape != source_weights.shape:
         token, grid = source_weights[0, :1], source_weights[0, 1:]
         sin = int(np.sqrt(grid.shape[0]))
-        sout = int(np.sqrt(expected_shape[1] - 1))
+        sout_x = num_x_patches
+        sout_y = num_y_patches
         warnings.warn(
-            "Resizing position embeddings from " f"{sin} to {sout}",
+            "Resizing position embeddings from " f"{sin}, {sin} to {sout_x}, {sout_y}",
             UserWarning,
         )
-        zoom = (sout / sin, sout / sin, 1)
+        zoom = (sout_x / sin, sout_y / sin, 1)
         grid = sp.ndimage.zoom(grid.reshape(sin, sin, -1), zoom, order=1).reshape(
-            sout * sout, -1
+            sout_x * sout_y, -1
         )
         source_weights = np.concatenate([token, grid], axis=0)[np.newaxis]
     target_layer.set_weights([source_weights])
 
 
-def load_weights_numpy(model, params_path, pretrained_top):
+def load_weights_numpy(model, params_path, pretrained_top, num_x_patches, num_y_patches):
     """Load weights saved using Flax as a numpy array.
 
     Args:
         model: A Keras model to load the weights into.
         params_path: Filepath to a numpy archive.
         pretrained_top: Whether to load the top layer weights.
+        num_x_patches: Number of patches in height of image.
+        num_y_patches: Number of patches in width of image.
     """
     params_dict = np.load(
         params_path, allow_pickle=False
@@ -183,6 +188,7 @@ def load_weights_numpy(model, params_path, pretrained_top):
     apply_embedding_weights(
         target_layer=model.get_layer("Transformer/posembed_input"),
         source_weights=params_dict["Transformer/posembed_input/pos_embedding"],
+        num_x_patches=num_x_patches, num_y_patches=num_y_patches
     )
     source_keys_used.append("Transformer/posembed_input/pos_embedding")
     for match in matches:
