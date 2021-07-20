@@ -273,7 +273,7 @@ def vit_l32(
         try:
             image_size = tuple(image_size)
         except TypeError:
-            raise ValueError('The image_size argument must be a tuple of ' + str(2) + ' integers. Received: ' + str(value))
+            raise ValueError('The image_size argument must be a tuple of ' + str(2) + ' integers. Received: ' + str(image_size))
     model = build_model(
         **CONFIG_L,
         patch_size=32,
