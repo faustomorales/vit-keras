@@ -64,7 +64,9 @@ def build_model(
         representation_size: The size of the representation prior to the
             classification layer. If None, no Dense layer is inserted.
     """
-    assert (image_size[0] % patch_size == 0) and (image_size[1] % patch_size == 0), "image_size must be a multiple of patch_size"
+    assert (image_size[0] % patch_size == 0) and (
+        image_size[1] % patch_size == 0
+    ), "image_size must be a multiple of patch_size"
     x = tf.keras.layers.Input(shape=(image_size[0], image_size[1], 3))
     y = tf.keras.layers.Conv2D(
         filters=hidden_size,
@@ -117,7 +119,9 @@ def load_pretrained(size, weights, pretrained_top, model, num_x_patches, num_y_p
     fname = f"ViT-{size}_{weights}.npz"
     origin = f"{BASE_URL}/{fname}"
     local_filepath = tf.keras.utils.get_file(fname, origin, cache_subdir="weights")
-    utils.load_weights_numpy(model, local_filepath, pretrained_top, num_x_patches, num_y_patches)
+    utils.load_weights_numpy(
+        model, local_filepath, pretrained_top, num_x_patches, num_y_patches
+    )
 
 
 def vit_b16(
@@ -143,7 +147,12 @@ def vit_b16(
         try:
             image_size = tuple(image_size)
         except TypeError:
-            raise ValueError('The image_size argument must be a tuple of ' + str(2) + ' integers. Received: ' + str(value))
+            raise ValueError(
+                "The image_size argument must be a tuple of "
+                + str(2)
+                + " integers. Received: "
+                + str(value)
+            )
     model = build_model(
         **CONFIG_B,
         name="vit-b16",
@@ -159,7 +168,12 @@ def vit_b16(
 
     if pretrained:
         load_pretrained(
-            size="B_16", weights=weights, model=model, pretrained_top=pretrained_top, num_x_patches=num_x_patches, num_y_patches=num_y_patches
+            size="B_16",
+            weights=weights,
+            model=model,
+            pretrained_top=pretrained_top,
+            num_x_patches=num_x_patches,
+            num_y_patches=num_y_patches,
         )
     return model
 
@@ -187,7 +201,12 @@ def vit_b32(
         try:
             image_size = tuple(image_size)
         except TypeError:
-            raise ValueError('The image_size argument must be a tuple of ' + str(2) + ' integers. Received: ' + str(value))
+            raise ValueError(
+                "The image_size argument must be a tuple of "
+                + str(2)
+                + " integers. Received: "
+                + str(value)
+            )
     model = build_model(
         **CONFIG_B,
         name="vit-b32",
@@ -202,7 +221,12 @@ def vit_b32(
     num_x_patches = image_size[1] // 32
     if pretrained:
         load_pretrained(
-            size="B_32", weights=weights, model=model, pretrained_top=pretrained_top, num_x_patches=num_x_patches, num_y_patches=num_y_patches
+            size="B_32",
+            weights=weights,
+            model=model,
+            pretrained_top=pretrained_top,
+            num_x_patches=num_x_patches,
+            num_y_patches=num_y_patches,
         )
     return model
 
@@ -230,7 +254,12 @@ def vit_l16(
         try:
             image_size = tuple(image_size)
         except TypeError:
-            raise ValueError('The image_size argument must be a tuple of ' + str(2) + ' integers. Received: ' + str(value))
+            raise ValueError(
+                "The image_size argument must be a tuple of "
+                + str(2)
+                + " integers. Received: "
+                + str(value)
+            )
     model = build_model(
         **CONFIG_L,
         patch_size=16,
@@ -245,7 +274,12 @@ def vit_l16(
     num_x_patches = image_size[1] // 16
     if pretrained:
         load_pretrained(
-            size="L_16", weights=weights, model=model, pretrained_top=pretrained_top, num_x_patches=num_x_patches, num_y_patches=num_y_patches
+            size="L_16",
+            weights=weights,
+            model=model,
+            pretrained_top=pretrained_top,
+            num_x_patches=num_x_patches,
+            num_y_patches=num_y_patches,
         )
     return model
 
@@ -273,7 +307,12 @@ def vit_l32(
         try:
             image_size = tuple(image_size)
         except TypeError:
-            raise ValueError('The image_size argument must be a tuple of ' + str(2) + ' integers. Received: ' + str(image_size))
+            raise ValueError(
+                "The image_size argument must be a tuple of "
+                + str(2)
+                + " integers. Received: "
+                + str(image_size)
+            )
     model = build_model(
         **CONFIG_L,
         patch_size=32,
@@ -288,6 +327,11 @@ def vit_l32(
     num_x_patches = image_size[1] // 32
     if pretrained:
         load_pretrained(
-            size="L_32", weights=weights, model=model, pretrained_top=pretrained_top, num_x_patches=num_x_patches, num_y_patches=num_y_patches
+            size="L_32",
+            weights=weights,
+            model=model,
+            pretrained_top=pretrained_top,
+            num_x_patches=num_x_patches,
+            num_y_patches=num_y_patches,
         )
     return model

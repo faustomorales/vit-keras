@@ -89,7 +89,9 @@ def apply_embedding_weights(target_layer, source_weights, num_x_patches, num_y_p
     target_layer.set_weights([source_weights])
 
 
-def load_weights_numpy(model, params_path, pretrained_top, num_x_patches, num_y_patches):
+def load_weights_numpy(
+    model, params_path, pretrained_top, num_x_patches, num_y_patches
+):
     """Load weights saved using Flax as a numpy array.
 
     Args:
@@ -188,7 +190,8 @@ def load_weights_numpy(model, params_path, pretrained_top, num_x_patches, num_y_
     apply_embedding_weights(
         target_layer=model.get_layer("Transformer/posembed_input"),
         source_weights=params_dict["Transformer/posembed_input/pos_embedding"],
-        num_x_patches=num_x_patches, num_y_patches=num_y_patches
+        num_x_patches=num_x_patches,
+        num_y_patches=num_y_patches,
     )
     source_keys_used.append("Transformer/posembed_input/pos_embedding")
     for match in matches:
