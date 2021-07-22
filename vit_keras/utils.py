@@ -42,7 +42,8 @@ def read(filepath_or_buffer: ImageInputType, size, timeout=None):
         image = np.asarray(bytearray(filepath_or_buffer.read()), dtype=np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
     elif isinstance(filepath_or_buffer, str) and validators.url(filepath_or_buffer):
-        return read(request.urlopen(filepath_or_buffer, timeout=timeout), size=size)
+        with request.urlopen(filepath_or_buffer, timeout=timeout) as r:
+            return read(r, size=size)
     else:
         if not os.path.isfile(filepath_or_buffer):
             raise FileNotFoundError(
