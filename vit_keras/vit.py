@@ -154,8 +154,8 @@ def vit_b16(
         include_top=include_top,
         representation_size=768 if weights == "imagenet21k" else None,
     )
-    num_x_patches = image_size[0] // 16
-    num_y_patches = image_size[1] // 16
+    num_y_patches = image_size[0] // 16
+    num_x_patches = image_size[1] // 16
 
     if pretrained:
         load_pretrained(
@@ -198,8 +198,8 @@ def vit_b32(
         include_top=include_top,
         representation_size=768 if weights == "imagenet21k" else None,
     )
-    num_x_patches = image_size[0] // 32
-    num_y_patches = image_size[1] // 32
+    num_y_patches = image_size[0] // 32
+    num_x_patches = image_size[1] // 32
     if pretrained:
         load_pretrained(
             size="B_32", weights=weights, model=model, pretrained_top=pretrained_top, num_x_patches=num_x_patches, num_y_patches=num_y_patches
@@ -241,8 +241,8 @@ def vit_l16(
         include_top=include_top,
         representation_size=1024 if weights == "imagenet21k" else None,
     )
-    num_x_patches = image_size[0] // 16
-    num_y_patches = image_size[1] // 16
+    num_y_patches = image_size[0] // 16
+    num_x_patches = image_size[1] // 16
     if pretrained:
         load_pretrained(
             size="L_16", weights=weights, model=model, pretrained_top=pretrained_top, num_x_patches=num_x_patches, num_y_patches=num_y_patches
@@ -284,8 +284,8 @@ def vit_l32(
         include_top=include_top,
         representation_size=1024 if weights == "imagenet21k" else None,
     )
-    num_x_patches = image_size[0] // 32
-    num_y_patches = image_size[1] // 32
+    num_y_patches = image_size[0] // 32
+    num_x_patches = image_size[1] // 32
     if pretrained:
         load_pretrained(
             size="L_32", weights=weights, model=model, pretrained_top=pretrained_top, num_x_patches=num_x_patches, num_y_patches=num_y_patches

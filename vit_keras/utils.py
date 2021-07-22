@@ -68,8 +68,8 @@ def apply_embedding_weights(target_layer, source_weights, num_x_patches, num_y_p
             be applied.
         source_weights: The source weights, which will be
             resized as necessary.
-        num_x_patches: Number of patches in height of image.
-        num_y_patches: Number of patches in width of image.
+        num_x_patches: Number of patches in width of image.
+        num_y_patches: Number of patches in height of image.
     """
     expected_shape = target_layer.weights[0].shape
     if expected_shape != source_weights.shape:
@@ -81,7 +81,7 @@ def apply_embedding_weights(target_layer, source_weights, num_x_patches, num_y_p
             "Resizing position embeddings from " f"{sin}, {sin} to {sout_x}, {sout_y}",
             UserWarning,
         )
-        zoom = (sout_x / sin, sout_y / sin, 1)
+        zoom = (sout_y / sin, sout_x / sin, 1)
         grid = sp.ndimage.zoom(grid.reshape(sin, sin, -1), zoom, order=1).reshape(
             sout_x * sout_y, -1
         )
@@ -96,8 +96,8 @@ def load_weights_numpy(model, params_path, pretrained_top, num_x_patches, num_y_
         model: A Keras model to load the weights into.
         params_path: Filepath to a numpy archive.
         pretrained_top: Whether to load the top layer weights.
-        num_x_patches: Number of patches in height of image.
-        num_y_patches: Number of patches in width of image.
+        num_x_patches: Number of patches in width of image.
+        num_y_patches: Number of patches in height of image.
     """
     params_dict = np.load(
         params_path, allow_pickle=False
