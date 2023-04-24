@@ -22,7 +22,7 @@ ImageInputType = typing.Union[str, np.ndarray, "PIL.Image.Image", io.BytesIO]
 def get_imagenet_classes() -> typing.List[str]:
     """Get the list of ImageNet 2012 classes."""
     filepath = pkg_resources.resource_filename("vit_keras", "imagenet2012.txt")
-    with open(filepath) as f:
+    with open(filepath, encoding="utf-8") as f:
         classes = [l.strip() for l in f.readlines()]
     return classes
 
@@ -45,7 +45,7 @@ def read(filepath_or_buffer: ImageInputType, size, timeout=None):
         with request.urlopen(filepath_or_buffer, timeout=timeout) as r:
             return read(r, size=size)
     else:
-        if not os.path.isfile(filepath_or_buffer):
+        if not os.path.isfile(typing.cast(str, filepath_or_buffer)):
             raise FileNotFoundError(
                 "Could not find image at path: " + filepath_or_buffer
             )

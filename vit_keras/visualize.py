@@ -28,7 +28,7 @@ def attention_map(model, image):
     num_layers = weights.shape[0]
     num_heads = weights.shape[2]
     reshaped = weights.reshape(
-        (num_layers, num_heads, grid_size ** 2 + 1, grid_size ** 2 + 1)
+        (num_layers, num_heads, grid_size**2 + 1, grid_size**2 + 1)
     )
 
     # From Appendix D.6 in the paper ...

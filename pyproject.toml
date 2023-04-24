@@ -26,22 +26,18 @@ version = "0.0.0"
 
 # See https://python-poetry.org/docs/versions/ for allowed version specification formats
 [tool.poetry.dependencies]
-python = ">=3.6.2,<4.0"
+python = ">=3.7, <3.12"
 scipy = "*"
 validators = "*"
 
 [tool.poetry.dev-dependencies]
 black = "*"
-coverage = {version = "*", extras = ["toml"]}
 mypy = "*"
-pytest = "^6.1"
+pytest = "*"
 pylint = "*"
-pytest-cov = "*"
-tensorflow = "2.4.1"
-tensorflow-addons = "0.13.0"
 opencv-python = "*"
-types-requests = "^0.1.12"
-types-pkg-resources = "^0.1.3"
+types-requests = "*"
+types-pkg-resources = "*"
 
 [tool.poetry.extras]
 visualization = [
@@ -54,9 +50,13 @@ vcs = "git"
 style = "semver"
 
 [tool.pytest.ini_options]
-addopts = "--cov=vit_keras --cov-report=term-missing"
 filterwarnings = [
     "ignore:the imp module is deprecated in favour of importlib;:DeprecationWarning"
+]
+
+[tool.pylint.main]
+extension-pkg-allow-list = [
+    "cv2",
 ]
 
 [tool.pylint.messages_control]
@@ -68,8 +68,6 @@ disable = [
     "too-many-locals",
     "too-many-arguments",
     "too-many-branches",
-    "too-many-statements"
-]
-extension-pkg-whitelist = [
-    "cv2"
+    "too-many-statements",
+    "no-member"
 ]

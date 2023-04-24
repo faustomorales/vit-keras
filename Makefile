@@ -23,6 +23,7 @@ help:
 init:  ## Initialize the development environment.
 	pip install poetry poetry-dynamic-versioning
 	poetry install
+	poetry run pip install tensorflow==2.10.0 tensorflow-addons==0.20.0
 
 format-check: ## Make black check source formatting
 	@$(EXEC) black --diff --check .
@@ -41,7 +42,7 @@ type-check: ## Make mypy check types
 	@$(EXEC) mypy $(PKG_NAME) tests
 
 lint-check: ## Make pylint lint the package
-	@$(EXEC) pylint --jobs 0 $(PKG_NAME)
+	@$(EXEC) pylint --rcfile pyproject.toml --jobs 0 $(PKG_NAME)
 
 lab: ## Start a jupyter lab instance
 	@$(EXEC) jupyter lab
