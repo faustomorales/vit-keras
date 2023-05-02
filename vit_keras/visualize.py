@@ -12,7 +12,7 @@ def attention_map(model, image):
         model: A ViT model
         image: An image for which we will compute the attention map.
     """
-    img_height, img_width = model.input_shape[0], model.input_shape[1]
+    img_height, img_width = model.input_shape[1], model.input_shape[2]
     grid_size = int(np.sqrt(model.layers[5].output_shape[0][-2] - 1))
 
     # Prepare the input
