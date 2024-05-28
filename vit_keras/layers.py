@@ -143,7 +143,7 @@ class TransformerBlock(tf.keras.layers.Layer):
                 ),
                 tf.keras.layers.Lambda(
                     lambda x: tf.keras.activations.gelu(x, approximate=False)
-                )
+                ),
                 tf.keras.layers.Dropout(self.dropout),
                 tf.keras.layers.Dense(input_shape[-1], name=f"{self.name}/Dense_1"),
                 tf.keras.layers.Dropout(self.dropout),
