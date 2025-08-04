@@ -81,7 +81,6 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
         self.value_dense = tf.keras.layers.Dense(hidden_size, name="value")
         self.combine_heads = tf.keras.layers.Dense(hidden_size, name="out")
 
-    # pylint: disable=no-self-use
     def attention(self, query, key, value):
         score = tf.matmul(query, key, transpose_b=True)
         dim_key = tf.cast(tf.shape(key)[-1], score.dtype)

@@ -7,7 +7,7 @@ PKG_NAME:=vit_keras
 TEST_SCOPE?=tests/
 
 # Prefix for running commands on the host vs in Docker (e.g., dev vs CI)
-EXEC:=poetry run
+EXEC:=uv run
 SPHINX_AUTO_EXTRA:=
 
 
@@ -21,9 +21,7 @@ help:
 	@echo '  e.g., make test TEST_SCOPE="-m not_integration tests/api/"'
 
 init:  ## Initialize the development environment.
-	pip install poetry poetry-dynamic-versioning
-	poetry install
-	poetry run pip install tensorflow==2.10.0 tensorflow-addons==0.20.0
+	@$(EXEC) sync
 
 format-check: ## Make black check source formatting
 	@$(EXEC) black --diff --check .
@@ -33,7 +31,7 @@ format: ## Make black unabashedly format source code
 
 package: ## Make a local build of the Python package, source dist and wheel
 	@mkdir -p dist
-	@$(EXEC) poetry build
+	@$(EXEC) build
 
 test: ## Make pytest run tests
 	@$(EXEC) pytest -vxrs $(TEST_SCOPE)
