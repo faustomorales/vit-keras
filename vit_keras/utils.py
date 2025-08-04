@@ -21,7 +21,11 @@ ImageInputType = typing.Union[str, np.ndarray, "PIL.Image.Image", io.BytesIO]
 
 def get_imagenet_classes() -> typing.List[str]:
     """Get the list of ImageNet 2012 classes."""
-    with importlib.resources.files("vit_keras").joinpath("imagenet2012.txt").open("r", encoding="utf-8") as f:
+    with (
+        importlib.resources.files("vit_keras")
+        .joinpath("imagenet2012.txt")
+        .open("r", encoding="utf-8") as f
+    ):
         classes = [l.strip() for l in f.readlines()]
     return classes
 
@@ -39,16 +43,17 @@ def read(filepath_or_buffer: ImageInputType, size, timeout=None):
         return np.array(filepath_or_buffer.convert("RGB"))
     if isinstance(filepath_or_buffer, (io.BytesIO, client.HTTPResponse)):
         image = np.asarray(bytearray(filepath_or_buffer.read()), dtype=np.uint8)
-        image = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
+        image = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)  # type: ignore
     elif isinstance(filepath_or_buffer, str) and validators.url(filepath_or_buffer):
         with request.urlopen(filepath_or_buffer, timeout=timeout) as r:
             return read(r, size=size)
     else:
-        if not os.path.isfile(typing.cast(str, filepath_or_buffer)):
+        filepath_or_buffer = typing.cast(str, filepath_or_buffer)
+        if not os.path.isfile(filepath_or_buffer):
             raise FileNotFoundError(
                 "Could not find image at path: " + filepath_or_buffer
             )
-        image = cv2.imread(filepath_or_buffer)
+        image = cv2.imread(filepath_or_buffer)  # type: ignore
     if image is None:
         raise ValueError(f"An error occurred reading {filepath_or_buffer}.")
     # We use cvtColor here instead of just ret[..., ::-1]
@@ -56,7 +61,7 @@ def read(filepath_or_buffer: ImageInputType, size, timeout=None):
     # array for later processing. Some hashers use ctypes
     # to pass the array and non-contiguous arrays can lead
     # to erroneous results.
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # type: ignore
     return cv2.resize(image, (size, size))
 
 
