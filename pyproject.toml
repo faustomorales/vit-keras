@@ -37,7 +37,8 @@ dev = [
     "opencv-python",
     "types-requests",
     "types-setuptools",
-    "tensorflow>=2.16",
+    "keras>=3",
+    "tensorflow",
     "jupyterlab",
     "matplotlib"
 ]

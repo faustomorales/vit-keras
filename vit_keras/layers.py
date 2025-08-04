@@ -1,9 +1,12 @@
 # pylint: disable=arguments-differ,missing-function-docstring,missing-class-docstring,unexpected-keyword-arg,no-value-for-parameter
-import tensorflow as tf
+try:
+    import keras
+except ImportError:
+    from tensorflow import keras
 
 
-@tf.keras.utils.register_keras_serializable()
-class ClassToken(tf.keras.layers.Layer):
+@keras.utils.register_keras_serializable()
+class ClassToken(keras.layers.Layer):
     """Append a class token to an input layer."""
 
     def build(self, input_shape):
@@ -17,12 +20,12 @@ class ClassToken(tf.keras.layers.Layer):
         )
 
     def call(self, inputs):
-        batch_size = tf.shape(inputs)[0]
-        cls_broadcasted = tf.cast(
-            tf.broadcast_to(self.cls, [batch_size, 1, self.hidden_size]),
+        batch_size = keras.ops.shape(inputs)[0]
+        cls_broadcasted = keras.ops.cast(
+            keras.ops.broadcast_to(self.cls, [batch_size, 1, self.hidden_size]),
             dtype=inputs.dtype,
         )
-        return tf.concat([cls_broadcasted, inputs], 1)
+        return keras.ops.concatenate([cls_broadcasted, inputs], 1)
 
     def get_config(self):
         config = super().get_config()
@@ -33,8 +36,8 @@ class ClassToken(tf.keras.layers.Layer):
         return cls(**config)
 
 
-@tf.keras.utils.register_keras_serializable()
-class AddPositionEmbs(tf.keras.layers.Layer):
+@keras.utils.register_keras_serializable()
+class AddPositionEmbs(keras.layers.Layer):
     """Adds (optionally learned) positional embeddings to the inputs."""
 
     def build(self, input_shape):
@@ -50,7 +53,7 @@ class AddPositionEmbs(tf.keras.layers.Layer):
         )
 
     def call(self, inputs):
-        return inputs + tf.cast(self.pe, dtype=inputs.dtype)
+        return inputs + keras.ops.cast(self.pe, dtype=inputs.dtype)
 
     def get_config(self):
         config = super().get_config()
@@ -61,8 +64,8 @@ class AddPositionEmbs(tf.keras.layers.Layer):
         return cls(**config)
 
 
-@tf.keras.utils.register_keras_serializable()
-class MultiHeadSelfAttention(tf.keras.layers.Layer):
+@keras.utils.register_keras_serializable()
+class MultiHeadSelfAttention(keras.layers.Layer):
     def __init__(self, *args, num_heads, **kwargs):
         super().__init__(*args, **kwargs)
         self.num_heads = num_heads
@@ -76,25 +79,25 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
             )
         self.hidden_size = hidden_size
         self.projection_dim = hidden_size // num_heads
-        self.query_dense = tf.keras.layers.Dense(hidden_size, name="query")
-        self.key_dense = tf.keras.layers.Dense(hidden_size, name="key")
-        self.value_dense = tf.keras.layers.Dense(hidden_size, name="value")
-        self.combine_heads = tf.keras.layers.Dense(hidden_size, name="out")
+        self.query_dense = keras.layers.Dense(hidden_size, name="query")
+        self.key_dense = keras.layers.Dense(hidden_size, name="key")
+        self.value_dense = keras.layers.Dense(hidden_size, name="value")
+        self.combine_heads = keras.layers.Dense(hidden_size, name="out")
 
     def attention(self, query, key, value):
-        score = tf.matmul(query, key, transpose_b=True)
-        dim_key = tf.cast(tf.shape(key)[-1], score.dtype)
-        scaled_score = score / tf.math.sqrt(dim_key)
-        weights = tf.nn.softmax(scaled_score, axis=-1)
-        output = tf.matmul(weights, value)
+        score = keras.ops.matmul(query, keras.ops.transpose(key, axes=[0, 1, 3, 2]))
+        dim_key = keras.ops.cast(keras.ops.shape(key)[-1], score.dtype)
+        scaled_score = score / keras.ops.sqrt(dim_key)
+        weights = keras.ops.softmax(scaled_score, axis=-1)
+        output = keras.ops.matmul(weights, value)
         return output, weights
 
     def separate_heads(self, x, batch_size):
-        x = tf.reshape(x, (batch_size, -1, self.num_heads, self.projection_dim))
-        return tf.transpose(x, perm=[0, 2, 1, 3])
+        x = keras.ops.reshape(x, (batch_size, -1, self.num_heads, self.projection_dim))
+        return keras.ops.transpose(x, axes=[0, 2, 1, 3])
 
     def call(self, inputs):
-        batch_size = tf.shape(inputs)[0]
+        batch_size = keras.ops.shape(inputs)[0]
         query = self.query_dense(inputs)
         key = self.key_dense(inputs)
         value = self.value_dense(inputs)
@@ -103,8 +106,8 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
         value = self.separate_heads(value, batch_size)
 
         attention, weights = self.attention(query, key, value)
-        attention = tf.transpose(attention, perm=[0, 2, 1, 3])
-        concat_attention = tf.reshape(attention, (batch_size, -1, self.hidden_size))
+        attention = keras.ops.transpose(attention, axes=[0, 2, 1, 3])
+        concat_attention = keras.ops.reshape(attention, (batch_size, -1, self.hidden_size))
         output = self.combine_heads(concat_attention)
         return output, weights
 
@@ -119,8 +122,8 @@ class MultiHeadSelfAttention(tf.keras.layers.Layer):
 
 
 # pylint: disable=too-many-instance-attributes
-@tf.keras.utils.register_keras_serializable()
-class TransformerBlock(tf.keras.layers.Layer):
+@keras.utils.register_keras_serializable()
+class TransformerBlock(keras.layers.Layer):
     """Implements a Transformer block."""
 
     def __init__(self, *args, num_heads, mlp_dim, dropout, **kwargs):
@@ -134,29 +137,29 @@ class TransformerBlock(tf.keras.layers.Layer):
             num_heads=self.num_heads,
             name="MultiHeadDotProductAttention_1",
         )
-        self.mlpblock = tf.keras.Sequential(
+        self.mlpblock = keras.Sequential(
             [
-                tf.keras.layers.Dense(
+                keras.layers.Dense(
                     self.mlp_dim,
                     activation="linear",
                     name=f"{self.name}_Dense_0",
                 ),
-                tf.keras.layers.Lambda(
-                    lambda x: tf.keras.activations.gelu(x, approximate=False)
+                keras.layers.Lambda(
+                    lambda x: keras.activations.gelu(x, approximate=False)
                 ),
-                tf.keras.layers.Dropout(self.dropout),
-                tf.keras.layers.Dense(input_shape[-1], name=f"{self.name}_Dense_1"),
-                tf.keras.layers.Dropout(self.dropout),
+                keras.layers.Dropout(self.dropout),
+                keras.layers.Dense(input_shape[-1], name=f"{self.name}_Dense_1"),
+                keras.layers.Dropout(self.dropout),
             ],
             name="MlpBlock_3",
         )
-        self.layernorm1 = tf.keras.layers.LayerNormalization(
+        self.layernorm1 = keras.layers.LayerNormalization(
             epsilon=1e-6, name="LayerNorm_0"
         )
-        self.layernorm2 = tf.keras.layers.LayerNormalization(
+        self.layernorm2 = keras.layers.LayerNormalization(
             epsilon=1e-6, name="LayerNorm_2"
         )
-        self.dropout_layer = tf.keras.layers.Dropout(self.dropout)
+        self.dropout_layer = keras.layers.Dropout(self.dropout)
 
     def call(self, inputs, training=False):
         x = self.layernorm1(inputs)

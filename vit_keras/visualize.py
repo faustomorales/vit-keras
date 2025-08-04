@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
-import tensorflow as tf
+try:
+    import keras
+except ImportError:
+    from tensorflow import keras
 from . import layers, vit
 
 
@@ -22,7 +25,7 @@ def attention_map(model, image):
         l.output[1] for l in model.layers if isinstance(l, layers.TransformerBlock)
     ]
     weights = np.array(
-        tf.keras.models.Model(inputs=model.inputs, outputs=outputs).predict(X)
+        keras.models.Model(inputs=model.inputs, outputs=outputs).predict(X)
     )
     num_layers = weights.shape[0]
     num_heads = weights.shape[2]

@@ -2,7 +2,10 @@
 
 import typing
 import warnings
-import tensorflow as tf
+try:
+    import keras
+except ImportError:
+    from tensorflow import keras
 import typing_extensions as tx
 
 from . import layers, utils
@@ -43,7 +46,7 @@ ImageSizeArg = typing.Union[typing.Tuple[int, int], int]
 
 def preprocess_inputs(X):
     """Preprocess images"""
-    return tf.keras.applications.imagenet_utils.preprocess_input(
+    return keras.applications.imagenet_utils.preprocess_input(
         X, data_format=None, mode="tf"
     )
 
@@ -100,15 +103,15 @@ def build_model(
     assert (image_size_tuple[0] % patch_size == 0) and (
         image_size_tuple[1] % patch_size == 0
     ), "image_size must be a multiple of patch_size"
-    x = tf.keras.layers.Input(shape=(image_size_tuple[0], image_size_tuple[1], 3))
-    y = tf.keras.layers.Conv2D(
+    x = keras.layers.Input(shape=(image_size_tuple[0], image_size_tuple[1], 3))
+    y = keras.layers.Conv2D(
         filters=hidden_size,
         kernel_size=patch_size,
         strides=patch_size,
         padding="valid",
         name="embedding",
     )(x)
-    y = tf.keras.layers.Reshape((y.shape[1] * y.shape[2], hidden_size))(y)
+    y = keras.layers.Reshape((y.shape[1] * y.shape[2], hidden_size))(y)
     y = layers.ClassToken(name="class_token")(y)
     y = layers.AddPositionEmbs(name="Transformer_posembed_input")(y)
     for n in range(num_layers):
@@ -118,17 +121,17 @@ def build_model(
             dropout=dropout,
             name=f"Transformer_encoderblock_{n}",
         )(y)
-    y = tf.keras.layers.LayerNormalization(
+    y = keras.layers.LayerNormalization(
         epsilon=1e-6, name="Transformer_encoder_norm"
     )(y)
-    y = tf.keras.layers.Lambda(lambda v: v[:, 0], name="ExtractToken")(y)
+    y = keras.layers.Lambda(lambda v: v[:, 0], name="ExtractToken")(y)
     if representation_size is not None:
-        y = tf.keras.layers.Dense(
+        y = keras.layers.Dense(
             representation_size, name="pre_logits", activation="tanh"
         )(y)
     if include_top:
-        y = tf.keras.layers.Dense(classes, name="head", activation=activation)(y)
-    return tf.keras.models.Model(inputs=x, outputs=y, name=name)
+        y = keras.layers.Dense(classes, name="head", activation=activation)(y)
+    return keras.models.Model(inputs=x, outputs=y, name=name)
 
 
 def validate_pretrained_top(
@@ -151,7 +154,7 @@ def load_pretrained(
     size: str,
     weights: str,
     pretrained_top: bool,
-    model: tf.keras.models.Model,
+    model: keras.models.Model,
     image_size: ImageSizeArg,
     patch_size: int,
 ):
@@ -159,7 +162,7 @@ def load_pretrained(
     image_size_tuple = interpret_image_size(image_size)
     fname = f"ViT-{size}_{weights}.npz"
     origin = f"{BASE_URL}/{fname}"
-    local_filepath = tf.keras.utils.get_file(fname, origin, cache_subdir="weights")
+    local_filepath = keras.utils.get_file(fname, origin, cache_subdir="weights")
     utils.load_weights_numpy(
         model=model,
         params_path=local_filepath,

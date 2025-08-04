@@ -2321,6 +2321,7 @@ visualization = [
 dev = [
     { name = "black" },
     { name = "jupyterlab" },
+    { name = "keras" },
     { name = "matplotlib" },
     { name = "mypy" },
     { name = "opencv-python" },
@@ -2343,12 +2344,13 @@ provides-extras = ["visualization"]
 dev = [
     { name = "black" },
     { name = "jupyterlab" },
+    { name = "keras", specifier = ">=3" },
     { name = "matplotlib" },
     { name = "mypy" },
     { name = "opencv-python" },
     { name = "pylint" },
     { name = "pytest" },
-    { name = "tensorflow", specifier = ">=2.16" },
+    { name = "tensorflow" },
     { name = "types-requests" },
     { name = "types-setuptools" },
 ]
