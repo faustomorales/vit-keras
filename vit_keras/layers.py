@@ -1,6 +1,7 @@
 # pylint: disable=arguments-differ,missing-function-docstring,missing-class-docstring,unexpected-keyword-arg,no-value-for-parameter
 import tensorflow as tf
 
+
 @tf.keras.utils.register_keras_serializable()
 class ClassToken(tf.keras.layers.Layer):
     """Append a class token to an input layer."""
