@@ -7,12 +7,13 @@ class ClassToken(tf.keras.layers.Layer):
     """Append a class token to an input layer."""
 
     def build(self, input_shape):
-        cls_init = tf.zeros_initializer()
         self.hidden_size = input_shape[-1]
-        self.cls = tf.Variable(
-            name="cls",
-            initial_value=cls_init(shape=(1, 1, self.hidden_size), dtype="float32"),
+        self.cls = self.add_weight(
+            shape=(1, 1, self.hidden_size),
+            initializer="zeros",
             trainable=True,
+            name="cls",
+            dtype="float32",
         )
 
     def call(self, inputs):
@@ -40,13 +41,12 @@ class AddPositionEmbs(tf.keras.layers.Layer):
         assert (
             len(input_shape) == 3
         ), f"Number of dimensions should be 3, got {len(input_shape)}"
-        self.pe = tf.Variable(
-            name="pos_embedding",
-            initial_value=tf.random_normal_initializer(stddev=0.06)(
-                shape=(1, input_shape[1], input_shape[2])
-            ),
-            dtype="float32",
+        self.pe = self.add_weight(
+            shape=(1, input_shape[1], input_shape[2]),
+            initializer="random_normal",
             trainable=True,
+            name="pos_embedding",
+            dtype="float32",
         )
 
     def call(self, inputs):
@@ -139,13 +139,13 @@ class TransformerBlock(tf.keras.layers.Layer):
                 tf.keras.layers.Dense(
                     self.mlp_dim,
                     activation="linear",
-                    name=f"{self.name}/Dense_0",
+                    name=f"{self.name}_Dense_0",
                 ),
                 tf.keras.layers.Lambda(
                     lambda x: tf.keras.activations.gelu(x, approximate=False)
                 ),
                 tf.keras.layers.Dropout(self.dropout),
-                tf.keras.layers.Dense(input_shape[-1], name=f"{self.name}/Dense_1"),
+                tf.keras.layers.Dense(input_shape[-1], name=f"{self.name}_Dense_1"),
                 tf.keras.layers.Dropout(self.dropout),
             ],
             name="MlpBlock_3",
@@ -158,7 +158,7 @@ class TransformerBlock(tf.keras.layers.Layer):
         )
         self.dropout_layer = tf.keras.layers.Dropout(self.dropout)
 
-    def call(self, inputs, training):
+    def call(self, inputs, training=False):
         x = self.layernorm1(inputs)
         x, weights = self.att(x)
         x = self.dropout_layer(x, training=training)

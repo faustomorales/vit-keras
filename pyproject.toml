@@ -37,7 +37,9 @@ dev = [
     "opencv-python",
     "types-requests",
     "types-setuptools",
-    "tensorflow>=2.16"
+    "tensorflow>=2.16",
+    "jupyterlab",
+    "matplotlib"
 ]
 
 [project.optional-dependencies]

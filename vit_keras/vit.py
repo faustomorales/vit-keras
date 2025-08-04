@@ -110,16 +110,16 @@ def build_model(
     )(x)
     y = tf.keras.layers.Reshape((y.shape[1] * y.shape[2], hidden_size))(y)
     y = layers.ClassToken(name="class_token")(y)
-    y = layers.AddPositionEmbs(name="Transformer/posembed_input")(y)
+    y = layers.AddPositionEmbs(name="Transformer_posembed_input")(y)
     for n in range(num_layers):
         y, _ = layers.TransformerBlock(
             num_heads=num_heads,
             mlp_dim=mlp_dim,
             dropout=dropout,
-            name=f"Transformer/encoderblock_{n}",
+            name=f"Transformer_encoderblock_{n}",
         )(y)
     y = tf.keras.layers.LayerNormalization(
-        epsilon=1e-6, name="Transformer/encoder_norm"
+        epsilon=1e-6, name="Transformer_encoder_norm"
     )(y)
     y = tf.keras.layers.Lambda(lambda v: v[:, 0], name="ExtractToken")(y)
     if representation_size is not None:
