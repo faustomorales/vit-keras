@@ -1,7 +1,5 @@
 # pylint: disable=arguments-differ,missing-function-docstring,missing-class-docstring,unexpected-keyword-arg,no-value-for-parameter
 import tensorflow as tf
-import tensorflow_addons as tfa
-
 
 @tf.keras.utils.register_keras_serializable()
 class ClassToken(tf.keras.layers.Layer):
@@ -145,10 +143,6 @@ class TransformerBlock(tf.keras.layers.Layer):
                 ),
                 tf.keras.layers.Lambda(
                     lambda x: tf.keras.activations.gelu(x, approximate=False)
-                )
-                if hasattr(tf.keras.activations, "gelu")
-                else tf.keras.layers.Lambda(
-                    lambda x: tfa.activations.gelu(x, approximate=False)
                 ),
                 tf.keras.layers.Dropout(self.dropout),
                 tf.keras.layers.Dense(input_shape[-1], name=f"{self.name}/Dense_1"),
