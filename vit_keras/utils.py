@@ -4,7 +4,7 @@ import warnings
 from urllib import request
 from http import client
 import io
-import pkg_resources
+import importlib.resources
 import validators
 import numpy as np
 import scipy as sp
@@ -21,8 +21,7 @@ ImageInputType = typing.Union[str, np.ndarray, "PIL.Image.Image", io.BytesIO]
 
 def get_imagenet_classes() -> typing.List[str]:
     """Get the list of ImageNet 2012 classes."""
-    filepath = pkg_resources.resource_filename("vit_keras", "imagenet2012.txt")
-    with open(filepath, encoding="utf-8") as f:
+    with importlib.resources.files("vit_keras").joinpath("imagenet2012.txt").open("r", encoding="utf-8") as f:
         classes = [l.strip() for l in f.readlines()]
     return classes
 
