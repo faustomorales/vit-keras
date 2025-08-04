@@ -1,12 +1,13 @@
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
 
 [tool.coverage.run]
 omit = []
 
-[tool.poetry]
-authors = ["Fausto Morales <faustomorales@gmail.com>"]
+[project]
+authors = [{ name = "Fausto Morales", email = "fausto@robinbay.com" }]
+requires-python = ">=3.10,<3.12"
 classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: Unix",
@@ -16,38 +17,39 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
 ]
 description = "Keras implementation of ViT (Vision Transformer)"
+dynamic = ["version"]
 homepage = "https://github.com/faustomorales/vit-keras"
-license = "Apache License 2.0"
+license = "Apache-2.0"
 name = "vit-keras"
 readme = "README.md"
 repository = "https://github.com/faustomorales/vit-keras"
-# Placeholder for poetry-dynamic-versioning
-version = "0.0.0"
+dependencies = [
+    "scipy",
+    "validators"
+]
 
-# See https://python-poetry.org/docs/versions/ for allowed version specification formats
-[tool.poetry.dependencies]
-python = ">=3.7, <3.12"
-scipy = "*"
-validators = "*"
+[dependency-groups]
+dev = [
+    "black",
+    "mypy",
+    "pytest",
+    "pylint",
+    "opencv-python",
+    "types-requests",
+    "types-setuptools",
+    "keras>=3"
+]
 
-[tool.poetry.dev-dependencies]
-black = "*"
-mypy = "*"
-pytest = "*"
-pylint = "*"
-opencv-python = "*"
-types-requests = "*"
-types-pkg-resources = "*"
-
-[tool.poetry.extras]
+[project.optional-dependencies]
 visualization = [
     "matplotlib"
 ]
 
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-style = "semver"
+[tool.uv-dynamic-versioning]
+fallback-version = "0.0.0"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
 
 [tool.pytest.ini_options]
 filterwarnings = [
