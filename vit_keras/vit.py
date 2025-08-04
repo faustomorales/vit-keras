@@ -2,6 +2,7 @@
 
 import typing
 import warnings
+
 try:
     import keras
 except ImportError:
@@ -121,9 +122,9 @@ def build_model(
             dropout=dropout,
             name=f"Transformer_encoderblock_{n}",
         )(y)
-    y = keras.layers.LayerNormalization(
-        epsilon=1e-6, name="Transformer_encoder_norm"
-    )(y)
+    y = keras.layers.LayerNormalization(epsilon=1e-6, name="Transformer_encoder_norm")(
+        y
+    )
     y = keras.layers.Lambda(lambda v: v[:, 0], name="ExtractToken")(y)
     if representation_size is not None:
         y = keras.layers.Dense(

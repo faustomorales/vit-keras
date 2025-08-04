@@ -1,4 +1,4 @@
-# pylint: disable=arguments-differ,missing-function-docstring,missing-class-docstring,unexpected-keyword-arg,no-value-for-parameter
+# pylint: disable=arguments-differ,missing-function-docstring,missing-class-docstring,unexpected-keyword-arg,no-value-for-parameter,too-many-ancestors,abstract-method
 try:
     import keras
 except ImportError:
@@ -107,7 +107,9 @@ class MultiHeadSelfAttention(keras.layers.Layer):
 
         attention, weights = self.attention(query, key, value)
         attention = keras.ops.transpose(attention, axes=[0, 2, 1, 3])
-        concat_attention = keras.ops.reshape(attention, (batch_size, -1, self.hidden_size))
+        concat_attention = keras.ops.reshape(
+            attention, (batch_size, -1, self.hidden_size)
+        )
         output = self.combine_heads(concat_attention)
         return output, weights
 

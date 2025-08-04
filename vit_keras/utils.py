@@ -14,7 +14,7 @@ try:
     import PIL
     import PIL.Image
 except ImportError:  # pragma: no cover
-    PIL = None
+    PIL = None  # type:ignore
 
 ImageInputType = typing.Union[str, np.ndarray, "PIL.Image.Image", io.BytesIO]
 
