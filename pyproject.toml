@@ -37,7 +37,7 @@ dev = [
     "opencv-python",
     "types-requests",
     "types-setuptools",
-    "keras>=3"
+    "tensorflow>=2.16"
 ]
 
 [project.optional-dependencies]
