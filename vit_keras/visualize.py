@@ -13,7 +13,6 @@ def attention_map(model, image):
         image: An image for which we will compute the attention map.
     """
     img_height, img_width = model.input_shape[1], model.input_shape[2]
-    grid_size = int(np.sqrt(model.layers[5].output_shape[0][-2] - 1))
 
     # Prepare the input
     X = vit.preprocess_inputs(cv2.resize(image, (img_height, img_width)))[np.newaxis, :]  # type: ignore
@@ -27,6 +26,7 @@ def attention_map(model, image):
     )
     num_layers = weights.shape[0]
     num_heads = weights.shape[2]
+    grid_size = int(np.sqrt(weights.shape[3] - 1))
     reshaped = weights.reshape(
         (num_layers, num_heads, grid_size**2 + 1, grid_size**2 + 1)
     )
